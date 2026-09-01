@@ -69,7 +69,7 @@ files Alex's code produced, not just against the code in theory.
 
 | `REVIEW.md` claim | Verified against the real artifact | How |
 |---|---|---|
-| Track chart x-order is value-sorted (Data Science, Design, Web Dev) | ✓ `charts_alex/chart_track_relationship.png` | Re-ran Alex's exact `groupby(...).mean().sort_values(ascending=False)` — order = DS, Design, WD; confirmed `value_sorted != natural` ([Web Dev, Data Science, Design]) |
+| Track chart x-order is value-sorted (Data Science, Design, Web Dev) | ✓ `charts_alex/chart_relationship_track.png` | Re-ran Alex's exact `groupby(...).mean().sort_values(ascending=False)` — order = DS, Design, WD; confirmed `value_sorted != natural` ([Web Dev, Data Science, Design]) |
 | Arbitrary red/yellow/green map — no justification, implies good/bad | ✓ same chart | Alex's code maps Data Science→green, Design→yellow, Web Dev→red — a stop-light scheme with no stated reason |
 | 4 charts exist and are the real products of his code | ✓ all four 800×500 RGBA PNGs | `PIL` open — real files, valid dimensions/mode |
 | Histogram annotation parked top-right under title | ✓ `charts_alex/chart_distribution.png` | Annotation placed at `xy=(0.98, 0.95)`; flagged as renderer-conditional |
