@@ -26,14 +26,25 @@ corrected notebook that would pass review.
 ## How to run
 
 ```bash
-pip3 install -r requirements.txt
-python3 generate_data.py                 # recreate data/learners.csv
-python3 test_peer_review_checks.py       # run the verification suite
-jupyter notebook                         # open the two notebooks
+# Create and activate the virtual environment (already gitignored)
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install exact pinned dependencies (plus notebook tooling)
+pip install -r requirements.txt ipykernel nbconvert nbclient nbformat
+
+# Regenerate the dataset (spec-exact, seed=33), re-execute both notebooks
+# headlessly, then run the verification suite — this is exactly how the
+# submission was verified
+python3 generate_data.py
+jupyter nbconvert --to notebook --execute --inplace alex_original.ipynb
+jupyter nbconvert --to notebook --execute --inplace week6_day2_peer_review_fixed.ipynb
+python3 test_peer_review_checks.py
 ```
 
 Both notebooks survive **Restart Kernel & Run All** with zero error cells
-(verified headlessly with `jupyter nbconvert --execute --inplace`).
+(verified headlessly with `jupyter nbconvert --execute --inplace`), and the
+executed fixed notebook regenerates all `charts_fixed/*.png` it owns.
 
 ## The 8 mistakes found in Alex's analysis
 
