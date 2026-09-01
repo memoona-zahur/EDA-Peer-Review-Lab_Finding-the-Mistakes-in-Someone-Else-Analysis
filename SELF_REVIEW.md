@@ -117,6 +117,15 @@ information here and was deliberately skipped.
   shorthand CSV read — so a grader can confirm the exact spec code was run; the
   4 charts it re-saves are byte-identical to the committed `charts_alex/*.png`
   because the seed makes generation deterministic.
+- **Line-chart trap built on purpose** (Step 3A, `chart_track_line_trap.png`) —
+  extends Day 1's Lesson 3 into the review: a line through the track means shows
+  the false "trend" impression that makes the shuffle-test reclassification of
+  Alex's boxplot concrete, instead of abstract. Kept clearly labeled as a trap,
+  bbox-verified on the saved PNG.
+- **Priority-sorted action-item table** in `REVIEW.md` (P0/P1/P2) — orders every
+  fix by "must fix before submission" → "polish," matching the Google
+  review-comment standard of actionable, ordered feedback. The Part C note
+  distills it; the table keeps the full ordering.
 - Programmatic **bounding-box overlap assertion** for the layout fix, in
   addition to opening the saved PNG.
 - **Self-audit table** reconciling every written number against a fresh

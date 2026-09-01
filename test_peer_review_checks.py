@@ -26,6 +26,7 @@ ORIG_NB = os.path.join(HERE, "alex_original.ipynb")
 FIXED_NB = os.path.join(HERE, "week6_day2_peer_review_fixed.ipynb")
 REVIEW_MD = os.path.join(HERE, "REVIEW.md")
 NOTE_MD = os.path.join(HERE, "REVIEWER_NOTE.md")
+TRAP_PNG = os.path.join(HERE, "charts_fixed", "chart_track_line_trap.png")
 
 passed = 0
 failed = 0
@@ -121,6 +122,15 @@ check(value_sorted != natural_order_in_spec,
 fixed_src = notebook_sources(FIXED_NB)
 check('order_natural = ["Web Dev", "Data Science", "Design"]' in fixed_src,
       "fixed notebook uses natural order Web Dev / Data Science / Design (not value-sorted)")
+
+# The line-chart trap (Lesson 3): built on purpose in the fixed notebook and
+# kept as a clearly-labelled trap, so the comparison's shuffle-test point is
+# visually concrete instead of abstract.
+trap_src = "Line through track means"
+check("Step 3A" in fixed_src, "fixed notebook has the line-chart-trap step (Step 3A)")
+check("FALSE" in fixed_src or "trap" in fixed_src.lower(),
+      "trap chart is clearly labelled as producing a false impression")
+check(png_ok(TRAP_PNG), "trap chart saved and valid PNG: chart_track_line_trap.png")
 
 # ---------------------------------------------------------------------------
 # Part 4 — the "~74%" claim must be caught as wrong and corrected
@@ -235,6 +245,8 @@ if os.path.exists(REVIEW_MD):
     rv = open(REVIEW_MD).read()
     check(all(k in rv for k in ["1", "2", "3", "4", "5", "6", "7", "8"]),
           "REVIEW.md enumerates all 8 checklist items")
+    check("Priority-sorted action items" in rv and "P0" in rv and "P2" in rv,
+          "REVIEW.md has a priority-sorted action-item table (P0/P1/P2)")
 # Reviewer note exists.
 check(os.path.exists(NOTE_MD), "REVIEWER_NOTE.md (Part C) exists")
 

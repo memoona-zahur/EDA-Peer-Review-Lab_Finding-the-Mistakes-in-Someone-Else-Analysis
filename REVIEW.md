@@ -204,6 +204,26 @@ explicitly: "Data Science learners have higher completion than Web Dev
 
 ---
 
+## Priority-sorted action items (what a teammate should fix first)
+
+Mirrors the Google review-comment standard — actionable, specific, and ordered
+so the most decision-relevant fixes come first. The Part C note distils these
+into one short comment; this table keeps the full ordering the note was built
+from.
+
+| Priority | Issue | Where | Why it matters | Fix |
+|---|---|---|---|---|
+| **P0 — blocks submission** | #1 relationship mislabeled as comparison | Track boxplot ("Relationship Between Course Track and Completion") | The whole track finding is framed as the wrong chart type — a stakeholder would read a causal-looking "relationship" that is really just a group difference | Reclassify as a comparison; add one-sentence shuffle-test justification |
+| **P0 — blocks submission** | #4 causal wording, no confound | Login note, Findings #1, Conclusion ("clearly causes", "cause", "clearest lever") | A stakeholder acts on "push logins to drive completion" as if it were a proven cause | Rewrite as correlational; name the confound (self-motivation) |
+| **P0 — blocks submission** | #7 number doesn't match | Findings #3 ("approximately 74%") | A written number that a fresh computation refutes is the exact self-audit failure the lesson targets | State the true mean (71.2%) from a live computation |
+| **P1 — should fix** | #8 comparison not backed by a CI | Findings #2 ("noticeably higher") | An eyeballed bar-chart gap — could be noise | Add bootstrap 95% CI [6.48, 13.17]; state it excludes 0 |
+| **P1 — should fix** | #2 correlation not computed | Login scatter ("strong, obvious" only) | No number to distinguish strength; unverifiable | Compute & report r = 0.838, p = 3.0e-212; annotate chart |
+| **P1 — should fix** | #3 null result hidden | Forum scatter (no note) | Decision-relevant null (r = 0.039, p = 0.270) never reaches findings | Write the null explicitly as a finding |
+| **P2 — polish** | #5 color & order unexamined | Track boxplot (red/yellow/green; value-sorted) | Hidden value judgment + hard to look up a track | Single deliberate color; natural order (Web Dev / DS / Design) |
+| **P2 — polish** | #6 layout fragility | Login-hours histogram (annotation top-right under title) | Renderer/DPI-dependent collision; looks fine inline | Reposition + `layout="constrained"`; verify on saved PNG (bbox) |
+
+---
+
 ## What was genuinely good (context for the priority-sorted Part C note)
 
 - The setup cell is correct and reproducible (seed=33, n=800) — Alex gave the

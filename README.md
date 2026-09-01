@@ -17,7 +17,7 @@ corrected notebook that would pass review.
 | `generate_data.py` | Reproduces Alex's dataset generator exactly (seed=33, n=800). |
 | `data/learners.csv` | 800 × 5 learners dataset produced by the generator. |
 | `charts_alex/` | Alex's 4 charts exactly as saved by his code. |
-| `charts_fixed/` | The 4 corrected charts, `layout="constrained"`, verified on the saved PNG. |
+| `charts_fixed/` | The corrected charts (incl. the deliberately-built line-chart trap), `layout="constrained"`, verified on the saved PNG. |
 | `technical_summary.md` | Plain-language write-up for a non-technical reader. |
 | `SELF_REVIEW.md` | Requirement-by-requirement verification of this exercise. |
 | `test_peer_review_checks.py` | Automated verification suite (all checks passing). |

@@ -64,6 +64,19 @@ from the data.
    **[6.48, 13.17]** never includes zero, so the gap is very unlikely to be
    random luck — it's a real difference.
 
+## Two extra things we added to make the review stronger
+
+- **A "line-chart trap" built on purpose.** We drew a line connecting the three
+  track averages, the way someone might accidentally draw "trends" between
+  categories. It shows why Alex's boxplot labeled as a "relationship" is
+  misleading: a line makes a comparison look like a rising path, when there is
+  no "between" Web Dev and Data Science to travel through. Seeing the trap makes
+  the shuffle-test explanation concrete instead of abstract.
+- **A priority-sorted fix list.** In the written review we also ordered every
+  fix by importance (what must be fixed before submission vs. what's polish), so
+  a teammate knows *where to start*, not just *what* is wrong — the actionable
+  standard real code reviews are held to.
+
 ## What the corrected report now says
 
 - Login hours are **associated** with higher completion (r = 0.838), but we
