@@ -15,7 +15,7 @@ delivered artifacts. Verification source: `test_peer_review_checks.py`
 | 5 | Forum-posts null brought into findings explicitly | Step 6 | ✓ r = 0.0390, p = 0.270 written as a null finding |
 | 6 | Login-hours finding rewritten correlational + one real confound | Step 5 | ✓ "associated", confound = self-motivation |
 | 7 | Course-track chart rebuilt with deliberate color + consistent non-value-sorted order | Step 3 | ✓ single color; natural order WD/DS/Design |
-| 8 | Histogram layout fixed + verified in actual saved PNG | Step 2 + bbox check | ✓ annotation removed (vlines+legend), `layout="constrained"`, saved PNG reopened, no title/legend overlap |
+| 8 | Histogram layout fixed + verified in actual saved PNG | Step 2 + saved-file QA cell + test Part 7 | ✓ annotation removed (vlines+legend), `layout="constrained"`; the saved PNG file is **reopened** (`Image.open`), shown pixel-identical to the verified render, and its title/legend bboxes asserted non-overlapping — in both the notebook cell and `test_peer_review_checks.py` Part 7 |
 | 9 | "~74%" checked against fresh computation, corrected | Step 7 | ✓ true 71.16 (71.2%); `matches: False` for claim 74 |
 | 10 | Bootstrap 95% CI for DS vs WD gap, zero-inclusion stated | Step 8 | ✓ gap 9.82, CI [6.48, 13.17], excludes 0 |
 | 11 | Reviewer's note — what was good + top fixes in priority order | `REVIEWER_NOTE.md` (Part C) | ✓ 3–4 sentence note + priority ordering |
@@ -56,7 +56,9 @@ delivered artifacts. Verification source: `test_peer_review_checks.py`
 - "~74%" flag: written claim vs true 71.16 mismatch detected
 - bootstrap CI excludes zero
 - all PNGs valid (magic bytes) in both `charts_alex/` and `charts_fixed/`
-- layout QA: fixed histogram title/legend do NOT overlap (bbox)
+- layout QA: fixed histogram title/legend do NOT overlap (bbox), verified on
+  the **reopened saved PNG**, which is shown pixel-identical to the verified
+  render
 - notebooks: zero error cells (Restart & Run All)
 
 ## Review self-audit — every Part A claim checked against the real artifacts
@@ -83,7 +85,11 @@ bbox assertion rather than trusting any single renderer.
 saved PNGs' pixel content — the visual claims (color scheme, order) are verified
 by re-running Alex's exact draw logic against the same code path that produced the
 files, which is deterministic for a fixed seed. Pixel-level OCR would add no
-information here and was deliberately skipped.
+information here and was deliberately skipped. The one place pixel-level proof
+*is* required — the fixed histogram's no-overlap claim — we do **not** skip it:
+the saved PNG is reopened, shown pixel-identical to the verified render, and
+checked at renderer level (title/legend bboxes) in both the notebook QA cell and
+`test_peer_review_checks.py` Part 7.
 
 ## Adversarial Self-Questions
 

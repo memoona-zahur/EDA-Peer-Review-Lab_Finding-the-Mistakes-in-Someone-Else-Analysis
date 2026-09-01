@@ -169,9 +169,11 @@ for p in sorted(os.listdir(CHF)):
     check(png_ok(os.path.join(CHF, p)), f"fixed chart valid PNG: {p}")
 
 # ---------------------------------------------------------------------------
-# Part 7 — layout QA: the fixed histogram has no title/legend overlap
+# Part 7 — layout QA: the ACTUAL saved PNG (reopened file) has no title/legend
+# overlap. Unlike a freshly-recreated figure, this reopens the saved file and
+# proves the file on disk is the verified render (pixel-identical).
 # ---------------------------------------------------------------------------
-print("== Part 7: layout QA (bbox) ==")
+print("== Part 7: layout QA (the actual saved PNG, reopened) ==")
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use("Agg")
@@ -187,7 +189,10 @@ def overlap(a, b):
     return ix > 0 and iy > 0
 
 
-fig, ax = plt.subplots(figsize=(8, 5), layout="constrained")
+# Rebuild the exact Step 2 figure at the same figsize/dpi the file was saved
+# with (dpi=150), pull bboxes off the real render, and assert no title/legend
+# overlap.
+fig, ax = plt.subplots(figsize=(8, 5), layout="constrained", dpi=150)
 ax.hist(df["weekly_login_hours"], bins=25, color="#4C72B0", edgecolor="white", alpha=0.9)
 ax.set_title("Distribution of Weekly Login Hours")
 ax.set_xlabel("Hours per Week")
@@ -200,8 +205,19 @@ leg = ax.legend(loc="upper right")
 fig.canvas.draw()
 tb = ax.title.get_window_extent(fig.canvas.get_renderer())
 lb = leg.get_window_extent(fig.canvas.get_renderer())
+check(not overlap(tb, lb), "fixed histogram: title and legend do NOT overlap (bbox-verified, saved-file render)")
+
+# Now reopen the ACTUAL saved PNG file and prove it is pixel-identical to this
+# verified render — so the no-overlap verdict applies to the file on disk, not
+# just to a freshly rebuilt figure.
+from PIL import Image
+saved = Image.open(os.path.join(CHF, "chart_distribution_fixed.png")).convert("RGB")
+render_rgb = np.asarray(fig.canvas.buffer_rgba())[..., :3]
 plt.close(fig)
-check(not overlap(tb, lb), "fixed histogram: title and legend do NOT overlap (bbox-verified)")
+check(saved.size == (render_rgb.shape[1], render_rgb.shape[0]),
+      f"saved PNG dimensions ({saved.size}) match the verified render ({render_rgb.shape[1]}x{render_rgb.shape[0]})")
+check(np.array_equal(np.asarray(saved), render_rgb),
+      "saved PNG pixels identical to the verified render (file IS the verified collision-free render)")
 
 # ---------------------------------------------------------------------------
 # Part 8 — notebook hygiene: zero error cells in both notebooks; original kept

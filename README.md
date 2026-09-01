@@ -44,7 +44,7 @@ Both notebooks survive **Restart Kernel & Run All** with zero error cells
 | 3 | Null results in findings | Forum-posts chart had **no note at all** | Null written up explicitly: **r = 0.039 (p = 0.270)** |
 | 4 | Causal wording + confound | "clearly causes", "cause", "clearest lever" | Correlational rewrite + named confound (**self-motivation**) |
 | 5 | Deliberate color & order | red/yellow/green arbitrary; value-sorted tracks | Single uniform color; natural order **Web Dev / Data Science / Design** |
-| 6 | Saved-file layout QA | Histogram annotation parked under title (renderer-dependent collision) | `layout="constrained"` + vlines/legend + bbox-verified on saved PNG |
+| 6 | Saved-file layout QA | Histogram annotation parked under title (renderer-dependent collision) | `layout="constrained"` + vlines/legend + bbox-verified on the **reopened** saved PNG (pixel-identical to verified render) |
 | 7 | Numbers match recomputation | "approximately 74%" | True value **71.16 → 71.2%**; mismatch flagged in self-audit |
 | 8 | Comparison backed by CI | "noticeably higher" with no backing | **Bootstrap 95% CI [6.48, 13.17]** for DS − WD; **excludes 0** |
 
