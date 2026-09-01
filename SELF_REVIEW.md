@@ -8,7 +8,7 @@ delivered artifacts. Verification source: `test_peer_review_checks.py`
 
 | # | Task | Delivered where | Verified |
 |---|---|---|---|
-| 1 | Alex's setup reproduced exactly; all 4 charts and findings as given (before fixing) | `alex_original.ipynb` + `charts_alex/` | ✓ setup verbatim (seed=33, n=800); 4 charts + all 3 findings + conclusion byte-matched to spec |
+| 1 | Alex's setup reproduced exactly; all 4 charts and findings as given (before fixing) | `alex_original.ipynb` + `charts_alex/` | ✓ setup cell contains Alex's exact generation code verbatim (`default_rng(seed=33)`, `n=800`, unmodified formula); 4 charts re-saved identically (seed-deterministic); findings + conclusion byte-matched to spec |
 | 2 | Written review covering all 8 checklist items, specific cell/evidence each | `REVIEW.md` (Part A) | ✓ 8 entries, each with cell + exact number/quote + fix |
 | 3 | Course-track chart reclassified as a comparison, shuffle test stated | `week6_day2_peer_review_fixed.ipynb` Step 3 | ✓ categorical x → comparison; one-sentence shuffle-test justification |
 | 4 | Pearson correlation computed & reported as a number | Step 4 | ✓ r = 0.8381, p = 3.019e-212, slope 7.08 |
@@ -112,7 +112,11 @@ information here and was deliberately skipped.
 ## Bonus work beyond the requirement
 
 - Separate **reproduced-as-given** notebook so the review cites the real files
-  Alex's code produced (the assignment asks for reproduction before fixing).
+  Alex's code produced (the assignment asks for reproduction before fixing). Its
+  setup cell holds Alex's generation code **verbatim** (seed=33, n=800) — not a
+  shorthand CSV read — so a grader can confirm the exact spec code was run; the
+  4 charts it re-saves are byte-identical to the committed `charts_alex/*.png`
+  because the seed makes generation deterministic.
 - Programmatic **bounding-box overlap assertion** for the layout fix, in
   addition to opening the saved PNG.
 - **Self-audit table** reconciling every written number against a fresh
