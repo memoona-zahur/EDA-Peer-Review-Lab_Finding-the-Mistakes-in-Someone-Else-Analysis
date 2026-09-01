@@ -169,14 +169,18 @@ for p in sorted(os.listdir(CHF)):
     check(png_ok(os.path.join(CHF, p)), f"fixed chart valid PNG: {p}")
 
 # ---------------------------------------------------------------------------
-# Part 7 — layout QA: the ACTUAL saved PNG (reopened file) has no title/legend
-# overlap. Unlike a freshly-recreated figure, this reopens the saved file and
-# proves the file on disk is the verified render (pixel-identical).
+# Part 7 — layout QA on EVERY fixed saved PNG (reopened file). For each chart
+# we rebuild the exact figure the notebook saved (same figsize/dpi/layout),
+# pull bounding boxes off the real render and assert the named text elements
+# do not overlap, then reopen the ACTUAL saved PNG and prove it is
+# pixel-identical to the verified render — so the no-overlap verdict applies
+# to the file on disk, not to a freshly rebuilt figure.
 # ---------------------------------------------------------------------------
-print("== Part 7: layout QA (the actual saved PNG, reopened) ==")
+print("== Part 7: layout QA (every fixed saved PNG, reopened) ==")
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use("Agg")
+from PIL import Image
 
 
 def overlap(a, b):
@@ -189,35 +193,108 @@ def overlap(a, b):
     return ix > 0 and iy > 0
 
 
-# Rebuild the exact Step 2 figure at the same figsize/dpi the file was saved
-# with (dpi=150), pull bboxes off the real render, and assert no title/legend
-# overlap.
-fig, ax = plt.subplots(figsize=(8, 5), layout="constrained", dpi=150)
-ax.hist(df["weekly_login_hours"], bins=25, color="#4C72B0", edgecolor="white", alpha=0.9)
-ax.set_title("Distribution of Weekly Login Hours")
-ax.set_xlabel("Hours per Week")
-ax.set_ylabel("Number of Learners")
-ax.axvline(df["weekly_login_hours"].mean(), color="crimson", linestyle="--",
-           label=f"mean = {df['weekly_login_hours'].mean():.1f} h")
-ax.axvline(df["weekly_login_hours"].median(), color="darkgreen", linestyle=":",
-           label=f"median = {df['weekly_login_hours'].median():.1f} h")
-leg = ax.legend(loc="upper right")
-fig.canvas.draw()
-tb = ax.title.get_window_extent(fig.canvas.get_renderer())
-lb = leg.get_window_extent(fig.canvas.get_renderer())
-check(not overlap(tb, lb), "fixed histogram: title and legend do NOT overlap (bbox-verified, saved-file render)")
+def qa_layout(label, png, build, pairs):
+    """Rebuild the exact saved figure (figsize=(8,5), layout='constrained',
+    dpi=150), test the named text-element overlap pairs on the real render,
+    then reopen the saved PNG and prove dims + pixels match that render."""
+    fig, ax = plt.subplots(figsize=(8, 5), layout="constrained", dpi=150)
+    artists = build(ax)
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    boxes = {name: art.get_window_extent(renderer) for name, art in artists.items()}
+    ok = all(not overlap(boxes[a], boxes[b]) for a, b in pairs)
+    check(ok, f"{label}: no overlap ({' | '.join(' vs '.join(p) for p in pairs)}), bbox-verified on the saved-file render")
+    saved = Image.open(os.path.join(CHF, png)).convert("RGB")
+    render_rgb = np.asarray(fig.canvas.buffer_rgba())[..., :3]
+    size = (render_rgb.shape[1], render_rgb.shape[0])
+    plt.close(fig)
+    check(saved.size == size, f"{label}: saved PNG dimensions ({saved.size}) match the verified render ({size[0]}x{size[1]})")
+    check(np.array_equal(np.asarray(saved), render_rgb),
+          f"{label}: saved PNG pixels identical to the verified render (file IS the verified collision-free render)")
 
-# Now reopen the ACTUAL saved PNG file and prove it is pixel-identical to this
-# verified render — so the no-overlap verdict applies to the file on disk, not
-# just to a freshly rebuilt figure.
-from PIL import Image
-saved = Image.open(os.path.join(CHF, "chart_distribution_fixed.png")).convert("RGB")
-render_rgb = np.asarray(fig.canvas.buffer_rgba())[..., :3]
-plt.close(fig)
-check(saved.size == (render_rgb.shape[1], render_rgb.shape[0]),
-      f"saved PNG dimensions ({saved.size}) match the verified render ({render_rgb.shape[1]}x{render_rgb.shape[0]})")
-check(np.array_equal(np.asarray(saved), render_rgb),
-      "saved PNG pixels identical to the verified render (file IS the verified collision-free render)")
+
+# 1) histogram (Step 2) — title vs legend.
+def build_hist(ax):
+    ax.hist(df["weekly_login_hours"], bins=25, color="#4C72B0", edgecolor="white", alpha=0.9)
+    ax.set_title("Distribution of Weekly Login Hours")
+    ax.set_xlabel("Hours per Week")
+    ax.set_ylabel("Number of Learners")
+    ax.axvline(df["weekly_login_hours"].mean(), color="crimson", linestyle="--",
+               label=f"mean = {df['weekly_login_hours'].mean():.1f} h")
+    ax.axvline(df["weekly_login_hours"].median(), color="darkgreen", linestyle=":",
+               label=f"median = {df['weekly_login_hours'].median():.1f} h")
+    leg = ax.legend(loc="upper right")
+    return {"title": ax.title, "legend": leg}
+
+
+qa_layout("fixed histogram", "chart_distribution_fixed.png", build_hist, [("title", "legend")])
+
+# 2) course-track boxplot (Step 3) — title vs xlabel.
+natural_order = ["Web Dev", "Data Science", "Design"]
+
+
+def build_box(ax):
+    df.boxplot(column="completion_pct", by="course_track", ax=ax, positions=range(len(natural_order)))
+    ax.set_xticks(range(len(natural_order)), natural_order)
+    ax.set_title("Completion by Course Track (comparison)")
+    ax.set_xlabel("Course Track")
+    ax.set_ylabel("Completion %")
+    ax.figure.suptitle("")  # suppress pandas' internal "Boxplot grouped by" title
+    return {"title": ax.title, "xlabel": ax.xaxis.label}
+
+
+qa_layout("fixed boxplot", "chart_comparison_track.png", build_box, [("title", "xlabel")])
+
+# 3) line-chart trap (Step 3A) — title vs xlabel, title vs every value label.
+line_order = list(means.sort_values(ascending=False).index)  # DS, Design, Web Dev
+
+
+def build_trap(ax):
+    x = range(len(line_order))
+    ax.plot(x, [means[t] for t in line_order], "o-", color="#C44E52")
+    ax.set_xticks(list(x), line_order)
+    ax.set_title("Line through track means - the FALSE 'trend' impression (trap)")
+    ax.set_xlabel("Course Track")
+    ax.set_ylabel("Mean Completion %")
+    arts = {"title": ax.title, "xlabel": ax.xaxis.label}
+    for i, (t, xi) in enumerate(zip(line_order, x)):
+        arts[f"ann{i}"] = ax.annotate(f"{means[t]:.1f}", (xi, means[t]),
+                                      textcoords="offset points", xytext=(0, 10), ha="center")
+    return arts
+
+
+qa_layout("fixed trap chart", "chart_track_line_trap.png", build_trap,
+          [("title", "xlabel"), ("title", "ann0"), ("title", "ann1"), ("title", "ann2")])
+
+# 4) login-hours scatter (Step 4) — title vs legend.
+r_login_re, _ = stats.pearsonr(df["weekly_login_hours"], df["completion_pct"])
+slope_re, intercept_re = np.polyfit(df["weekly_login_hours"], df["completion_pct"], 1)
+
+
+def build_login(ax):
+    ax.scatter(df["weekly_login_hours"], df["completion_pct"], alpha=0.4)
+    ax.plot(df["weekly_login_hours"], slope_re * df["weekly_login_hours"] + intercept_re,
+            color="crimson", linewidth=2,
+            label=f"r = {r_login_re:.3f}, slope = {slope_re:.1f} pts/h")
+    ax.set_title("Weekly Login Hours vs. Completion")
+    ax.set_xlabel("Weekly Login Hours")
+    ax.set_ylabel("Completion %")
+    leg = ax.legend()
+    return {"title": ax.title, "legend": leg}
+
+
+qa_layout("fixed login scatter", "chart_login_vs_completion_fixed.png", build_login, [("title", "legend")])
+
+# 5) forum-posts scatter (Step 6) — title vs xlabel.
+def build_forum(ax):
+    ax.scatter(df["forum_posts"], df["completion_pct"], alpha=0.4)
+    ax.set_title("Forum Posts vs. Completion")
+    ax.set_xlabel("Forum Posts")
+    ax.set_ylabel("Completion %")
+    return {"title": ax.title, "xlabel": ax.xaxis.label}
+
+
+qa_layout("fixed forum scatter", "chart_forum_vs_completion_fixed.png", build_forum, [("title", "xlabel")])
 
 # ---------------------------------------------------------------------------
 # Part 8 — notebook hygiene: zero error cells in both notebooks; original kept
