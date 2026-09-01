@@ -59,6 +59,30 @@ delivered artifacts. Verification source: `test_peer_review_checks.py`
 - layout QA: fixed histogram title/legend do NOT overlap (bbox)
 - notebooks: zero error cells (Restart & Run All)
 
+## Adversarial Self-Questions
+
+- **What looks correct but might be wrong?** The fix for the layout issue
+  removes the annotation entirely (replaced by labeled vlines + a legend) rather
+  than just nudging its coordinates — so the "reposition it" fix is robust to
+  other renderers/DPIs, verified by a bounding-box assertion on the saved PNG,
+  not by eyeballing inline. The one place we *did* keep a numeric claim ("~74%")
+  is proven wrong by recomputation (71.16), not just flagged.
+- **What would break if input changed?** The dataset is fixed by spec (seed=33,
+  n=800), and the latter adversarial checks pin the delivered CSV to a fresh
+  regeneration — so a silently changed `learners.csv` (drift, reordering, new
+  rows) is caught by exact equality with the regenerated reference, not by
+  loose shape checks.
+- **What could a skeptic question?** A skeptic could ask whether the "real
+  difference" conclusion (CI excludes 0) is a *statistical* statement dressed up
+  as a *causal* one. Answered: the CI is explicitly scoped to "real in this
+  dataset," the observation is correlational, and the confound (self-motivation)
+  is named — the causal question is deliberately left unanswered.
+- **What did we NOT do?** We did not recompute Spearman — the assignment asked
+  for Pearson only, and Pearson vs Spearman are nearly identical here
+  (0.838 vs 0.843), so a padding comparison would add noise, not insight. We did
+  not invent a confound-free causal story for the track gap (the data can't
+  explain *why* Data Science is higher). Both stated, not hidden.
+
 ## Bonus work beyond the requirement
 
 - Separate **reproduced-as-given** notebook so the review cites the real files
